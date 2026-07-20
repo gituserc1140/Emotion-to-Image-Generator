@@ -218,8 +218,12 @@ def main():
             st.image(image_url, caption=f'Emotion: {emotion.strip().capitalize()}', use_container_width=True)
 
         except Exception as exc:
+            err_msg = str(exc)
+            # Redact the token from any error message before displaying
+            if replicate_token:
+                err_msg = err_msg.replace(replicate_token, "***")
             st.markdown(
-                f'<div class="error-card">⚠️ Something went wrong: {exc}</div>',
+                f'<div class="error-card">⚠️ Something went wrong: {err_msg}</div>',
                 unsafe_allow_html=True,
             )
 
