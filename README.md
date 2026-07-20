@@ -1,7 +1,8 @@
 # Emotion to Image Generator App
 
-[![GitHub Stars](https://img.shields.io/github/stars/gituserc1140/Emotion-to-Image-Generator?style=social)](https://github.com/gituserc1140/Emotion-to-Image-Generator)
-[![GitHub Sponsors](https://img.shields.io/github/sponsors/gituserc1140?style=social)](https://github.com/sponsors/gituserc1140)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://emotion-to-image-generator-zlwg4jpc73odhx42iucbft.streamlit.app/)
+[![GitHub](https://img.shields.io/badge/View%20on-GitHub-181717?logo=github&style=flat-square)](https://github.com/gituserc1140/Emotion-to-Image-Generator)
+[![Sponsor me on GitHub](https://img.shields.io/badge/Sponsor%20me%20on-GitHub-EA4AAA?logo=githubsponsors&style=flat-square)](https://github.com/sponsors/gituserc1140)
 
 A Streamlit app that takes your current emotion and instantly generates:
 
