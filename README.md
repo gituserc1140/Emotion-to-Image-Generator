@@ -8,7 +8,7 @@ A Streamlit app that takes your current emotion and instantly generates:
 
 - **A unique AI-generated image** created with Poliinations API
 
-No configuration files or environment variables needed — just paste your API keys directly in the sidebar.
+No configuration files or environment variables needed — Uses an open-source API endpoint
 
 ---
 
