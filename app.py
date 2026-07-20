@@ -1,4 +1,3 @@
-import openai
 import replicate
 import streamlit as st
 
@@ -137,22 +136,6 @@ _SPONSOR_URL = "https://github.com/sponsors/gituserc1140"
 _SDXL_MODEL = "stability-ai/sdxl:7762fd07cf82c948538e41f63f77d685e02b063e37e496e96eefd46c929f9bdc"
 
 
-def generate_compliment(client: openai.OpenAI, emotion: str, name: str) -> str:
-    name_phrase = f" for {name}" if name.strip() else ""
-    prompt = (
-        f"Write a short, warm, and genuinely uplifting personal compliment{name_phrase} "
-        f"who is feeling {emotion}. Keep it to 2–3 sentences. "
-        "Make it feel sincere and specific to that emotion."
-    )
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}],
-        max_tokens=120,
-        temperature=0.85,
-    )
-    return response.choices[0].message.content.strip()
-
-
 def generate_image(replicate_token: str, emotion: str) -> str:
     client = replicate.Client(api_token=replicate_token)
     output = client.run(
@@ -183,7 +166,7 @@ def main():
         """
         <div class="hero">
             <h1>🎨 Emotion to Image Generator</h1>
-            <p>Enter your emotion and instantly receive a personalised compliment and a unique AI-generated image.</p>
+            <p>Enter your emotion and instantly receive a unique AI-generated image.</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -191,11 +174,6 @@ def main():
 
     # ── Sidebar ────────────────────────────────────────────────────
     st.sidebar.header("Settings")
-    api_key_input = st.sidebar.text_input(
-        "OpenAI API Key",
-        type="password",
-        help="Enter your OpenAI API key. Get one at https://platform.openai.com/api-keys",
-    )
     replicate_token_input = st.sidebar.text_input(
         "Replicate API Token",
         type="password",
@@ -216,10 +194,9 @@ def main():
         unsafe_allow_html=True,
     )
 
-    api_key = api_key_input.strip()
     replicate_token = replicate_token_input.strip()
-    if not api_key or not replicate_token:
-        st.warning("Please enter your OpenAI API key and Replicate API token in the sidebar to continue.")
+    if not replicate_token:
+        st.warning("Please enter your Replicate API token in the sidebar to continue.")
         st.stop()
 
     # ── Inputs ─────────────────────────────────────────────────────
@@ -227,40 +204,19 @@ def main():
         "How are you feeling?",
         placeholder="e.g. happy, anxious, excited, melancholy…",
     )
-    name = st.text_input(
-        "Your name (optional)",
-        placeholder="Leave blank for a general compliment",
-    )
 
     if st.button("✨ Generate"):
         if not emotion.strip():
             st.warning("Please enter an emotion first.")
             st.stop()
 
-        client = openai.OpenAI(api_key=api_key)
         try:
-            with st.spinner("Crafting your compliment…"):
-                compliment = generate_compliment(client, emotion.strip(), name.strip())
-
-            st.markdown('<div class="section-label">💬 Your Compliment</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="compliment-card">{compliment}</div>', unsafe_allow_html=True)
-
             with st.spinner("Painting your image… 🎨"):
                 image_url = generate_image(replicate_token, emotion.strip())
 
             st.markdown('<div class="section-label">🖼️ Your Image</div>', unsafe_allow_html=True)
             st.image(image_url, caption=f'Emotion: {emotion.strip().capitalize()}', use_container_width=True)
 
-        except openai.AuthenticationError:
-            st.markdown(
-                '<div class="error-card">⚠️ Invalid API key. Please check your OpenAI API key and try again.</div>',
-                unsafe_allow_html=True,
-            )
-        except openai.RateLimitError:
-            st.markdown(
-                '<div class="error-card">⚠️ Rate limit reached. Please wait a moment and try again.</div>',
-                unsafe_allow_html=True,
-            )
         except Exception as exc:
             st.markdown(
                 f'<div class="error-card">⚠️ Something went wrong: {exc}</div>',
