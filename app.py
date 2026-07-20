@@ -158,7 +158,6 @@ def generate_image(emotion: str) -> bytes:
 def main():
     st.set_page_config(
         page_title="Emotion to Image Generator",
-        page_icon="🎨",
         layout="centered",
     )
     st.markdown(_CSS, unsafe_allow_html=True)
@@ -167,7 +166,7 @@ def main():
     st.markdown(
         """
         <div class="hero">
-            <h1>🎨 Emotion to Image Generator</h1>
+            <h1>Emotion to Image Generator</h1>
             <p>Enter your emotion and instantly receive a unique AI-generated image.</p>
         </div>
         """,
@@ -181,10 +180,10 @@ def main():
         f"""
         <div class="gh-buttons">
             <a class="gh-btn gh-btn-github" href="{_GITHUB_URL}" target="_blank">
-                ⭐ View on GitHub
+                View on GitHub
             </a>
             <a class="gh-btn gh-btn-sponsor" href="{_SPONSOR_URL}" target="_blank">
-                💖 Sponsor on GitHub
+                Sponsor on GitHub
             </a>
         </div>
         """,
@@ -197,26 +196,25 @@ def main():
         placeholder="e.g. happy, anxious, excited, melancholy…",
     )
 
-    if st.button("✨ Generate"):
+    if st.button("Generate"):
         if not emotion.strip():
             st.warning("Please enter an emotion first.")
             st.stop()
 
         try:
-            with st.spinner("Painting your image… 🎨"):
+            with st.spinner("Painting your image…"):
                 image_bytes = generate_image(emotion.strip())
 
-            st.markdown('<div class="section-label">🖼️ Your Image</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-label">Your Image</div>', unsafe_allow_html=True)
             st.image(image_bytes, caption=f'Emotion: {emotion.strip().capitalize()}', use_container_width=True)
 
         except Exception as exc:
             err_msg = str(exc)
             st.markdown(
-                f'<div class="error-card">⚠️ Something went wrong: {err_msg}</div>',
+                f'<div class="error-card">Something went wrong: {err_msg}</div>',
                 unsafe_allow_html=True,
             )
 
 
 if __name__ == "__main__":
     main()
-
