@@ -1,4 +1,5 @@
 import openai
+import replicate
 import streamlit as st
 
 _CSS = """
@@ -133,6 +134,7 @@ _CSS = """
 
 _GITHUB_URL = "https://github.com/gituserc1140/Emotion-to-Image-Generator"
 _SPONSOR_URL = "https://github.com/sponsors/gituserc1140"
+_SDXL_MODEL = "stability-ai/sdxl:7762fd07cf82c948538e41f63f77d685e02b063e37e496e96eefd46c929f9bdc"
 
 
 def generate_compliment(client: openai.OpenAI, emotion: str, name: str) -> str:
@@ -151,18 +153,21 @@ def generate_compliment(client: openai.OpenAI, emotion: str, name: str) -> str:
     return response.choices[0].message.content.strip()
 
 
-def generate_image(client: openai.OpenAI, emotion: str) -> str:
-    response = client.images.generate(
-        model="dall-e-3",
-        prompt=(
-            f"An artistic, vibrant, and uplifting illustration representing the emotion of '{emotion}'. "
-            "Evocative, colourful, painterly style."
-        ),
-        size="1024x1024",
-        quality="standard",
-        n=1,
+def generate_image(replicate_token: str, emotion: str) -> str:
+    client = replicate.Client(api_token=replicate_token)
+    output = client.run(
+        _SDXL_MODEL,
+        input={
+            "prompt": (
+                f"An artistic, vibrant, and uplifting illustration representing the emotion of '{emotion}'. "
+                "Evocative, colourful, painterly style."
+            ),
+            "width": 1024,
+            "height": 1024,
+        },
     )
-    return response.data[0].url
+    # output is a list of image URLs
+    return output[0]
 
 
 def main():
@@ -191,6 +196,11 @@ def main():
         type="password",
         help="Enter your OpenAI API key. Get one at https://platform.openai.com/api-keys",
     )
+    replicate_token_input = st.sidebar.text_input(
+        "Replicate API Token",
+        type="password",
+        help="Enter your Replicate API token. Get one at https://replicate.com/account/api-tokens",
+    )
 
     st.sidebar.markdown(
         f"""
@@ -207,8 +217,9 @@ def main():
     )
 
     api_key = api_key_input.strip()
-    if not api_key:
-        st.warning("Please enter your OpenAI API key in the sidebar to continue.")
+    replicate_token = replicate_token_input.strip()
+    if not api_key or not replicate_token:
+        st.warning("Please enter your OpenAI API key and Replicate API token in the sidebar to continue.")
         st.stop()
 
     # ── Inputs ─────────────────────────────────────────────────────
@@ -235,7 +246,7 @@ def main():
             st.markdown(f'<div class="compliment-card">{compliment}</div>', unsafe_allow_html=True)
 
             with st.spinner("Painting your image… 🎨"):
-                image_url = generate_image(client, emotion.strip())
+                image_url = generate_image(replicate_token, emotion.strip())
 
             st.markdown('<div class="section-label">🖼️ Your Image</div>', unsafe_allow_html=True)
             st.image(image_url, caption=f'Emotion: {emotion.strip().capitalize()}', use_container_width=True)

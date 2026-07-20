@@ -6,17 +6,17 @@
 A Streamlit app that takes your current emotion and instantly generates:
 
 - 💬 **A short, personalised compliment** powered by OpenAI GPT-4o mini
-- 🖼️ **A unique AI-generated image** created with DALL-E 3
+- 🖼️ **A unique AI-generated image** created with Stable Diffusion XL (SDXL) via Replicate
 
-No configuration files or environment variables needed — just paste your OpenAI API key directly in the sidebar.
+No configuration files or environment variables needed — just paste your API keys directly in the sidebar.
 
 ---
 
 ## Features
 
-- **Frontend API key entry** — your key stays in your browser session, never stored server-side
+- **Frontend API key entry** — your keys stay in your browser session, never stored server-side
 - **Personalised compliments** — optionally enter your name for a more tailored message
-- **DALL-E 3 images** — vivid, artistic images matched to your emotion
+- **SDXL images** — vivid, artistic images matched to your emotion, generated with Stable Diffusion XL via Replicate
 - **GitHub & Sponsor buttons** — right in the sidebar
 - Clean, dark gradient UI styled for a polished feel
 
@@ -39,9 +39,13 @@ pip install -r requirements.txt
 
 ### 3. Get an OpenAI API key
 
-Sign up or log in at [https://platform.openai.com/api-keys](https://platform.openai.com/api-keys) and create a new secret key. Make sure your account has access to the `gpt-4o-mini` and `dall-e-3` models.
+Sign up or log in at [https://platform.openai.com/api-keys](https://platform.openai.com/api-keys) and create a new secret key. Make sure your account has access to the `gpt-4o-mini` model.
 
-### 4. Run the app
+### 4. Get a Replicate API token
+
+Sign up or log in at [https://replicate.com/account/api-tokens](https://replicate.com/account/api-tokens) and create a new token. This is used for SDXL image generation.
+
+### 5. Run the app
 
 ```bash
 streamlit run app.py
@@ -53,9 +57,10 @@ streamlit run app.py
 
 1. **Open the app** — Streamlit will launch it in your browser automatically.
 2. **Enter your OpenAI API key** in the sidebar (it is treated as a password field).
-3. **Type how you're feeling** in the "How are you feeling?" box (e.g. *happy*, *anxious*, *excited*).
-4. Optionally **enter your name** for a more personalised compliment.
-5. Click **✨ Generate** — your compliment and image will appear within seconds.
+3. **Enter your Replicate API token** in the sidebar (it is treated as a password field).
+4. **Type how you're feeling** in the "How are you feeling?" box (e.g. *happy*, *anxious*, *excited*).
+5. Optionally **enter your name** for a more personalised compliment.
+6. Click **✨ Generate** — your compliment and image will appear within seconds.
 
 ---
 
@@ -64,7 +69,8 @@ streamlit run app.py
 | Package | Purpose |
 |---------|---------|
 | `streamlit` | Web app framework |
-| `openai` | GPT-4o mini (compliments) + DALL-E 3 (images) |
+| `openai` | GPT-4o mini (compliments) |
+| `replicate` | SDXL via Replicate (images) |
 
 ---
 
