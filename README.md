@@ -72,4 +72,4 @@ Pull requests are welcome! For major changes please open an issue first.
 
 ## Support
 
-If you find this project useful, consider [sponsoring on GitHub](https://github.com/sponsors/gituserc1140) 💖
+If you find this project useful, consider [sponsoring on GitHub](https://github.com/sponsors/gituserc1140) 
