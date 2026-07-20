@@ -208,7 +208,7 @@ def main():
 
     api_key = api_key_input.strip()
     if not api_key:
-        st.warning("Please enter your OpenAI API key in the sidebar to continue.", icon=None)
+        st.warning("Please enter your OpenAI API key in the sidebar to continue.")
         st.stop()
 
     # ── Inputs ─────────────────────────────────────────────────────
