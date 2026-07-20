@@ -1,6 +1,6 @@
-import io
+import urllib.parse
 
-from huggingface_hub import InferenceClient
+import requests
 import streamlit as st
 
 _CSS = """
@@ -135,24 +135,24 @@ _CSS = """
 
 _GITHUB_URL = "https://github.com/gituserc1140/Emotion-to-Image-Generator"
 _SPONSOR_URL = "https://github.com/sponsors/gituserc1140"
-_HF_MODEL = "black-forest-labs/FLUX.1-schnell"
+_POLLINATIONS_URL = "https://image.pollinations.ai/prompt/{prompt}"
 
 
-def generate_image(hf_token: str, emotion: str) -> bytes:
-    client = InferenceClient(token=hf_token)
-    image = client.text_to_image(
-        prompt=(
-            f"An artistic, vibrant, and uplifting illustration representing the emotion of '{emotion}'. "
-            "Evocative, colourful, painterly style."
-        ),
-        model=_HF_MODEL,
-        width=1024,
-        height=1024,
+def generate_image(emotion: str) -> bytes:
+    prompt = (
+        f"An artistic, vibrant, and uplifting illustration representing the emotion of '{emotion}'. "
+        "Evocative, colourful, painterly style."
     )
-    # image is a PIL Image — convert to bytes for st.image
-    buf = io.BytesIO()
-    image.save(buf, format="PNG")
-    return buf.getvalue()
+    params = urllib.parse.urlencode({"width": 1024, "height": 1024, "nologo": "true", "model": "flux"})
+    url = f"{_POLLINATIONS_URL.format(prompt=urllib.parse.quote(prompt))}?{params}"
+    try:
+        response = requests.get(url, timeout=120)
+        response.raise_for_status()
+    except requests.exceptions.ConnectionError as exc:
+        raise RuntimeError("Could not connect to Pollinations.AI — check your internet connection.") from exc
+    except requests.exceptions.Timeout as exc:
+        raise RuntimeError("Request to Pollinations.AI timed out — please try again.") from exc
+    return response.content
 
 
 def main():
@@ -176,11 +176,6 @@ def main():
 
     # ── Sidebar ────────────────────────────────────────────────────
     st.sidebar.header("Settings")
-    hf_token_input = st.sidebar.text_input(
-        "Hugging Face API Token",
-        type="password",
-        help="Enter your Hugging Face API token. Get one free at https://huggingface.co/settings/tokens",
-    )
 
     st.sidebar.markdown(
         f"""
@@ -196,11 +191,6 @@ def main():
         unsafe_allow_html=True,
     )
 
-    hf_token = hf_token_input.strip()
-    if not hf_token:
-        st.warning("Please enter your Hugging Face API token in the sidebar to continue.")
-        st.stop()
-
     # ── Inputs ─────────────────────────────────────────────────────
     emotion = st.text_input(
         "How are you feeling?",
@@ -214,16 +204,13 @@ def main():
 
         try:
             with st.spinner("Painting your image… 🎨"):
-                image_bytes = generate_image(hf_token, emotion.strip())
+                image_bytes = generate_image(emotion.strip())
 
             st.markdown('<div class="section-label">🖼️ Your Image</div>', unsafe_allow_html=True)
             st.image(image_bytes, caption=f'Emotion: {emotion.strip().capitalize()}', use_container_width=True)
 
         except Exception as exc:
             err_msg = str(exc)
-            # Redact the token from any error message before displaying
-            if hf_token:
-                err_msg = err_msg.replace(hf_token, "***")
             st.markdown(
                 f'<div class="error-card">⚠️ Something went wrong: {err_msg}</div>',
                 unsafe_allow_html=True,
