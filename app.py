@@ -1,4 +1,6 @@
-import replicate
+import io
+
+from huggingface_hub import InferenceClient
 import streamlit as st
 
 _CSS = """
@@ -133,24 +135,24 @@ _CSS = """
 
 _GITHUB_URL = "https://github.com/gituserc1140/Emotion-to-Image-Generator"
 _SPONSOR_URL = "https://github.com/sponsors/gituserc1140"
-_SDXL_MODEL = "stability-ai/sdxl:7762fd07cf82c948538e41f63f77d685e02b063e37e496e96eefd46c929f9bdc"
+_HF_MODEL = "black-forest-labs/FLUX.1-schnell"
 
 
-def generate_image(replicate_token: str, emotion: str) -> str:
-    client = replicate.Client(api_token=replicate_token)
-    output = client.run(
-        _SDXL_MODEL,
-        input={
-            "prompt": (
-                f"An artistic, vibrant, and uplifting illustration representing the emotion of '{emotion}'. "
-                "Evocative, colourful, painterly style."
-            ),
-            "width": 1024,
-            "height": 1024,
-        },
+def generate_image(hf_token: str, emotion: str) -> bytes:
+    client = InferenceClient(token=hf_token)
+    image = client.text_to_image(
+        prompt=(
+            f"An artistic, vibrant, and uplifting illustration representing the emotion of '{emotion}'. "
+            "Evocative, colourful, painterly style."
+        ),
+        model=_HF_MODEL,
+        width=1024,
+        height=1024,
     )
-    # output is a list of image URLs
-    return output[0]
+    # image is a PIL Image — convert to bytes for st.image
+    buf = io.BytesIO()
+    image.save(buf, format="PNG")
+    return buf.getvalue()
 
 
 def main():
@@ -174,10 +176,10 @@ def main():
 
     # ── Sidebar ────────────────────────────────────────────────────
     st.sidebar.header("Settings")
-    replicate_token_input = st.sidebar.text_input(
-        "Replicate API Token",
+    hf_token_input = st.sidebar.text_input(
+        "Hugging Face API Token",
         type="password",
-        help="Enter your Replicate API token. Get one at https://replicate.com/account/api-tokens",
+        help="Enter your Hugging Face API token. Get one free at https://huggingface.co/settings/tokens",
     )
 
     st.sidebar.markdown(
@@ -194,9 +196,9 @@ def main():
         unsafe_allow_html=True,
     )
 
-    replicate_token = replicate_token_input.strip()
-    if not replicate_token:
-        st.warning("Please enter your Replicate API token in the sidebar to continue.")
+    hf_token = hf_token_input.strip()
+    if not hf_token:
+        st.warning("Please enter your Hugging Face API token in the sidebar to continue.")
         st.stop()
 
     # ── Inputs ─────────────────────────────────────────────────────
@@ -212,16 +214,16 @@ def main():
 
         try:
             with st.spinner("Painting your image… 🎨"):
-                image_url = generate_image(replicate_token, emotion.strip())
+                image_bytes = generate_image(hf_token, emotion.strip())
 
             st.markdown('<div class="section-label">🖼️ Your Image</div>', unsafe_allow_html=True)
-            st.image(image_url, caption=f'Emotion: {emotion.strip().capitalize()}', use_container_width=True)
+            st.image(image_bytes, caption=f'Emotion: {emotion.strip().capitalize()}', use_container_width=True)
 
         except Exception as exc:
             err_msg = str(exc)
             # Redact the token from any error message before displaying
-            if replicate_token:
-                err_msg = err_msg.replace(replicate_token, "***")
+            if hf_token:
+                err_msg = err_msg.replace(hf_token, "***")
             st.markdown(
                 f'<div class="error-card">⚠️ Something went wrong: {err_msg}</div>',
                 unsafe_allow_html=True,
